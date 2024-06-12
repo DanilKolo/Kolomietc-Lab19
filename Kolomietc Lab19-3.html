@@ -1,0 +1,98 @@
+document.addEventListener('DOMContentLoaded', function() {
+    const startButton = document.getElementById('startGame');
+    const gamePage = document.getElementById('gamePage');
+    const restartButton = document.getElementById('restartGame');
+    const gameArea = document.getElementById('gameArea');
+    const currentImage = document.getElementById('currentImage');
+
+    let images = [];
+    let currentImageIndex = 0;
+
+    // Function to start the game
+    function startGame() {
+        // Show game page and hide start button
+        document.querySelector('.container').classList.add('hidden');
+        gamePage.classList.remove('hidden');
+
+        // Load images for the game area
+        loadImages();
+    }
+
+    // Function to load images for the game area
+    function loadImages() {
+        // Simulate loading images from a local directory
+        // In a real application, you would fetch images dynamically
+        // Here, we use placeholder images for demonstration
+        for (let i = 1; i <= 25; i++) {
+            let imgSrc = `images/animals/${Math.floor(Math.random() * 50) + 1}.jpg`;
+            let img = document.createElement('img');
+            img.src = imgSrc;
+            images.push(img);
+        }
+
+        // Display images in the game area
+        images.forEach(img => {
+            gameArea.appendChild(img);
+            img.addEventListener('dragstart', dragStart);
+            img.addEventListener('dragover', dragOver);
+            img.addEventListener('drop', drop);
+        });
+
+        // Select a random image for the current image area
+        currentImageIndex = Math.floor(Math.random() * 25);
+        let currentImgSrc = `images/animals/${Math.floor(Math.random() * 50) + 1}.jpg`;
+        let currentImg = document.createElement('img');
+        currentImg.src = currentImgSrc;
+        currentImage.appendChild(currentImg);
+        currentImg.setAttribute('draggable', 'true');
+        currentImg.addEventListener('dragstart', dragStart);
+    }
+
+    // Drag and drop functions
+    function dragStart(event) {
+        event.dataTransfer.setData('text/plain', event.target.src);
+    }
+
+    function dragOver(event) {
+        event.preventDefault();
+    }
+
+    function drop(event) {
+        event.preventDefault();
+        let data = event.dataTransfer.getData('text/plain');
+        event.target.src = data;
+        event.target.style.border = 'none';
+
+        // Check if the game is completed
+        if (checkGameComplete()) {
+            setTimeout(() => {
+                alert('Вітаємо! Ви завершили гру!');
+                restartGame();
+            }, 500);
+        }
+    }
+
+    // Function to check if all images are placed correctly
+    function checkGameComplete() {
+        let gameImages = gameArea.querySelectorAll('img');
+        for (let i = 0; i < gameImages.length; i++) {
+            let expectedSrc = currentImage.firstChild.src;
+            if (gameImages[i].src !== expectedSrc) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    // Function to restart the game
+    function restartGame() {
+        gameArea.innerHTML = '';
+        currentImage.innerHTML = '';
+        images = [];
+        loadImages();
+    }
+
+    // Event listeners
+    startButton.addEventListener('click', startGame);
+    restartButton.addEventListener('click', restartGame);
+});
